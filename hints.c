@@ -33,11 +33,7 @@ static int write_all(int fd, const char *data, size_t len) {
 
 static int open_listener(const char *port) {
     struct addrinfo hints = {0}, *res, *ai;
-    hints.ai_family   = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags    = AI_PASSIVE;
-
-    int rc = getaddrinfo(NULL, port, &hints, &res);
+    hints.ai_family   = AF_UNSPEC; hints.ai_socktype = SOCK_STREAM; hints.ai_flags    = AI_PASSIVE; int rc = getaddrinfo(NULL, port, &hints, &res);
     if (rc != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rc));
         return -1;

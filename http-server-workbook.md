@@ -7,7 +7,6 @@ It still does not hand you a finished server. You write the bodies of the functi
 ## How to use the hints
 
 Every milestone has three levels of hint, hidden behind a click:
-
 - **Hint 1** is a nudge: which function or idea to look at.
 - **Hint 2** is the shape of the answer: pseudocode or the key lines.
 - **Hint 3** is a working version of the hardest part.
@@ -59,7 +58,12 @@ CFLAGS  = -std=c11 -D_GNU_SOURCE -g -O1 -Wall -Wextra -pthread \
           -fsanitize=address,undefined
 LDFLAGS = -pthread -fsanitize=address,undefined
 SRC     = $(wildcard src/*.c)
-OBJ     = $(SRC:.c=.o)
+OBJ     = $( kevyn   http-server-c   main ≡  ?2 ~2 -2    make
+gcc -std=c11 -D_GNU_SOURCE -g -O1 -Wall -Wextra -pthread -fsanitize=address,undefined   -c -o src/files.o src/files.c
+cc1: fatal error: src/files.c: No such file or directory
+compilation terminated.
+make: *** [<builtin>: src/files.o] Error 1
+ kevyn   http-server-c   main ≡  ?2 ~2 -2    SRC:.c=.o)
 
 server: $(OBJ)
 	$(CC) $(OBJ) -o $@ $(LDFLAGS)
@@ -1309,8 +1313,8 @@ static const struct route routes[] = {
     { "GET", "/health", handle_health },
     { "GET", "/time",   handle_time   },
 };
-```
 
+```
 Look up the route first; fall back to static files when nothing matches. Add a 405 response when the path exists but the method does not.
 
 ### Directory listings
