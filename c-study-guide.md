@@ -1,6 +1,4 @@
-# C Study Guide
-
-An original, chapter-by-chapter study guide that covers the same ground, in the same order, as the classic C reference text (*The C Programming Language* by Kernighan & Ritchie). All notes, examples and exercises here are written from scratch. Use it alongside the book, not as a replacement for it.
+# C Study Guide An original, chapter-by-chapter study guide that covers the same ground, in the same order, as the classic C reference text (*The C Programming Language* by Kernighan & Ritchie). All notes, examples and exercises here are written from scratch. Use it alongside the book, not as a replacement for it.
 
 **How to use this guide:** read a chapter, type out every example, compile with `gcc -Wall -Wextra -std=c11`, then do the exercises before moving on.
 
