@@ -8,6 +8,20 @@
 #define PORT "8080"
 #define BACKLOG 16
 
+static int write_all(int fd, const char *data, size_t len) {
+  while (len > 0) {
+    ssize_t n = write(fd, data, len);
+      if (n < 0) {
+        if (errno == EINTR) continue;
+        return -1;
+      }
+    data += n;
+    len -= (size_t)n;
+  }
+  return 0;
+}
+
+
 static int open_listener(const char *port) {
   struct addrinfo hints, *res, *ai;
   memset(&hints, 0, sizeof hints);
@@ -46,7 +60,20 @@ static int open_listener(const char *port) {
 }
 
 static void echo_client(int fd) {
-  printf("test %d\n", fd);
+    char buf[4096];
+    for (;;) {
+        ssize_t n = read(fd, buf, sizeof buf);
+        if (n == 0) return;
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            perror("read");
+            return;
+        }
+        if (write_all(fd, buf, (size_t)n) < 0) {
+            perror("write");
+            return;
+        }
+    }
 }
 
 int main(void) {
