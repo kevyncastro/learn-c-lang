@@ -5,23 +5,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "open_listener.h"
+#include "write_all.h"
 
 #define PORT "8080"
 #define BACKLOG 16
-
-static int write_all(int fd, const char *data, size_t len) {
-  while (len > 0) {
-    ssize_t n = write(fd, data, len);
-      if (n < 0) {
-        if (errno == EINTR) continue;
-        return -1;
-      }
-    data += n;
-    len -= (size_t)n;
-  }
-  return 0;
-}
-
 
 static void echo_client(int fd) {
     char buf[4096];
