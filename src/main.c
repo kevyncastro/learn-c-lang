@@ -42,7 +42,6 @@ int main(void) {
     }
     printf("client connected\n");
     handle_client(client_fd);
-    close(client_fd);
     printf("client left\n");
   }
 }
