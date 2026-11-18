@@ -1,5 +1,6 @@
 #include <asm-generic/errno-base.h>
 #include <stddef.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -7,12 +8,31 @@
 #include "write_all.h"
 
 #define REQ_MAX 8192
+#define MAX_HEADERS 64
 
 struct req {
   int fd;
   char *buf;
   size_t cap;
   size_t *head_len;
+};
+
+struct slice {
+    const char *ptr;
+    size_t      len;
+};
+
+struct header {
+    struct slice name;
+    struct slice value;
+};
+
+struct request {
+    struct slice  method;
+    struct slice  target;
+    struct slice  version;
+    struct header headers[MAX_HEADERS];
+    size_t        header_count;
 };
 
 const char *find_head_end(struct req *request, size_t len) {
@@ -24,7 +44,7 @@ const char *find_head_end(struct req *request, size_t len) {
   return NULL;
 };
 
-const ssize_t read_request_head(struct req *request) {
+const char read_request_head(struct req *request) {
   size_t used = 0;
   for(;;) {
     if (used == request->cap) return -2;
@@ -37,8 +57,6 @@ const ssize_t read_request_head(struct req *request) {
     used += n;
     const char *start = request->buf;
     const char *end = find_head_end(request, used);
-    printf("%.*s", (int)(end - request->buf), request->buf);
-    printf("end of headers %s", end);
 
     if (end) {
       *request->head_len = (size_t)(end - request->buf) + 4;
@@ -47,9 +65,17 @@ const ssize_t read_request_head(struct req *request) {
   }
 };
 
-void handle_request(int fd, char *buf, size_t len) {
+static void parse_request(struct req *request, struct request *client_request, const char *end) {
+  const char *result = memchr(request->buf,' ', request->cap);
+  char *method = strndup(request->buf, (size_t)(result - request->buf) + 1);
+  printf("method: %s\n", method);
+};
+
+void handle_request(struct req *request) {
   char head[612];
   char *body = "WTF";
+  ssize_t got = read_request_head(request);
+  if (got <= 0) printf("none\n");
   int n = snprintf(head, sizeof head,
                    "HTTP/1.1 %d\r\n"
                    "\r\n",
@@ -57,15 +83,16 @@ void handle_request(int fd, char *buf, size_t len) {
   if (n < 0 || (size_t)n >= sizeof head) {
     perror("error");
   }
-  write_all(fd, head, (size_t)n);
-  write_all(fd, body, strlen(body));
+  const char *end = request->buf + got;
+  write_all(request->fd, head, (size_t)n);
+  write_all(request->fd, body, strlen(body));
+  struct request *client_request;
+  parse_request(request, client_request, end);
 }
 
 void handle_client(int fd) {
   char buf[REQ_MAX];
   size_t head_len;
   struct req request = { fd, buf, sizeof buf, &head_len };
-  ssize_t got = read_request_head(&request);
-  if (got <= 0) printf("none\n");
-  handle_request(fd, buf, sizeof buf);
+  handle_request(&request);
 };
