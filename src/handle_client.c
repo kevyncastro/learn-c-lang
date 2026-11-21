@@ -65,10 +65,11 @@ const char read_request_head(struct req *request) {
   }
 };
 
-static void parse_request(struct req *request, struct request *client_request, const char *end) {
+struct slice parse_request_method(struct req *request, struct request *client_request, const char *end) {
   const char *result = memchr(request->buf,' ', request->cap);
   char *method = strndup(request->buf, (size_t)(result - request->buf) + 1);
-  printf("method: %s\n", method);
+  // client_request->method = (struct slice){method, (size_t)(result - request->buf) + 1};
+  return (struct slice){method, (size_t)(result - request->buf) + 1 };
 };
 
 void handle_request(struct req *request) {
@@ -86,8 +87,10 @@ void handle_request(struct req *request) {
   const char *end = request->buf + got;
   write_all(request->fd, head, (size_t)n);
   write_all(request->fd, body, strlen(body));
-  struct request *client_request;
-  parse_request(request, client_request, end);
+  struct request client_request = {};
+  client_request.method = parse_request_method(request, &client_request, end);
+  printf("-----PARSING METHOD------\n");
+  printf("Method: %s\n", client_request.method.ptr);
 }
 
 void handle_client(int fd) {
