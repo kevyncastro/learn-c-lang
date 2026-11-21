@@ -69,7 +69,6 @@ struct parse_request_method_return { struct slice method; char *result; };
 struct parse_request_method_return parse_request_method(struct req *request, struct request *client_request) {
   char *result = memchr(request->buf,' ', request->cap);
   char *method = strndup(request->buf, (size_t)(result - request->buf) + 1);
-  // client_request->method = (struct slice){method, (size_t)(result - request->buf) + 1};
   const struct parse_request_method_return return_object = { { method, (size_t)(result - request->buf) + 1 }, result };
   return return_object;
 }

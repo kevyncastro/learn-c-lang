@@ -9,6 +9,21 @@
 #define PORT "8080"
 #define BACKLOG 16
 
+typedef struct {
+  char *ptr;
+} object;
+
+typedef struct {
+  object methods;
+  object targets;
+} Routes;
+
+typedef struct {
+  Routes routes;
+  int fd;
+  // function pointer for adding routes
+} Server;
+
 int main(void) {
   int listen_fd = open_listener(PORT, BACKLOG);
   if (listen_fd < 0) return 1;
