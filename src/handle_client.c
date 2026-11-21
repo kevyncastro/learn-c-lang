@@ -65,12 +65,20 @@ const char read_request_head(struct req *request) {
   }
 };
 
-struct slice parse_request_method(struct req *request, struct request *client_request, const char *end) {
-  const char *result = memchr(request->buf,' ', request->cap);
+struct parse_request_method_return { struct slice method; char *result; };
+struct parse_request_method_return parse_request_method(struct req *request, struct request *client_request) {
+  char *result = memchr(request->buf,' ', request->cap);
   char *method = strndup(request->buf, (size_t)(result - request->buf) + 1);
   // client_request->method = (struct slice){method, (size_t)(result - request->buf) + 1};
-  return (struct slice){method, (size_t)(result - request->buf) + 1 };
-};
+  const struct parse_request_method_return return_object = { { method, (size_t)(result - request->buf) + 1 }, result };
+  return return_object;
+}
+
+struct slice parse_request_target(const char *string, struct request *client_request, char *sp1) {
+  const char *sp2 = memchr(sp1 + 1, ' ', (size_t)(string - (sp1 + 1)));
+  char *target = strndup(sp1 + 1, (size_t)(sp2 - (sp1 + 1)));
+  return (struct slice){target, (size_t)(sp2 - target) + 1 };
+}
 
 void handle_request(struct req *request) {
   char head[612];
@@ -88,9 +96,11 @@ void handle_request(struct req *request) {
   write_all(request->fd, head, (size_t)n);
   write_all(request->fd, body, strlen(body));
   struct request client_request = {};
-  client_request.method = parse_request_method(request, &client_request, end);
-  printf("-----PARSING METHOD------\n");
+  struct parse_request_method_return getMethodObject = parse_request_method(request, &client_request);
+  client_request.method = getMethodObject.method;
+  client_request.target = parse_request_target(end, &client_request, getMethodObject.result);
   printf("Method: %s\n", client_request.method.ptr);
+  printf("Target: %s\n", client_request.target.ptr);
 }
 
 void handle_client(int fd) {
